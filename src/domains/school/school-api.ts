@@ -10,6 +10,11 @@ async function getSchools(): Promise<ISchoolDTO[]> {
   return response.data;
 }
 
+async function getSchool(id: string): Promise<ISchoolDTO> {
+  const response = await api.get<ISchoolDTO>(`/schools/${id}`);
+  return response.data;
+}
+
 async function createSchool(payload: TCreateSchoolPayload): Promise<ISchoolDTO> {
   const response = await api.post<ISchoolDTO>("/schools", payload);
   return response.data;
@@ -29,6 +34,7 @@ async function deleteSchool(schoolId: string): Promise<void> {
 
 export const schoolApi = {
   getSchools,
+  getSchool,
   createSchool,
   updateSchool,
   deleteSchool,

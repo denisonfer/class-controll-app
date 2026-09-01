@@ -8,6 +8,11 @@ async function getSchools(): Promise<TSchool[]> {
   return getSchoolDto.map(schoolAdapter.toSchool);
 }
 
+async function getSchool(id: string): Promise<TSchool> {
+  const schoolDto = await schoolApi.getSchool(id);
+  return schoolAdapter.toSchool(schoolDto);
+}
+
 async function createSchool(school: TCreateSchool): Promise<TSchool> {
   const createSchoolDto = await schoolApi.createSchool(
     schoolAdapter.toPayload(school),
@@ -29,6 +34,7 @@ async function deleteSchool(schoolId: string): Promise<void> {
 
 export const schoolService = {
   getSchools,
+  getSchool,
   createSchool,
   updateSchool,
   deleteSchool,

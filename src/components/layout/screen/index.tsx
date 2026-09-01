@@ -2,6 +2,7 @@ import { KeyboardAvoidingView, Platform, ScrollView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Box } from "@/components/ui/box";
+import { AppToastHost } from "@/shared/hooks/use-app-toast";
 
 import { ScreenHeader } from "./screen-header";
 import { TScreenProps } from "./types";
@@ -33,7 +34,7 @@ export function Screen({
 
   const content = (
     <Box
-      className={`flex-1 bg-background  ${className ?? ""}`}
+      className={`relative flex-1 bg-background  ${className ?? ""}`}
       style={{ paddingTop: top, paddingBottom: bottom }}
     >
       <ScreenHeader
@@ -45,6 +46,7 @@ export function Screen({
         {body}
         {floatingAction}
       </Box>
+      <AppToastHost />
     </Box>
   );
 

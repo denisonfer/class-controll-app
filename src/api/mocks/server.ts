@@ -125,6 +125,7 @@ export function makeServer() {
       this.post("/schools", (schema, request) => {
         const body = JSON.parse(request.requestBody) as TCreateSchoolPayload;
 
+        //return new Response(500, {}, { message: "Falha simulada" });
         return schema.create("school", {
           name: body.school_name,
           address: body.school_address,
