@@ -8,7 +8,14 @@ O código está organizado por domínio, com fronteira explícita entre contrato
 
 ## Preview
 
-<!-- cola os prints / GIFs aqui -->
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/650bb112-d2ae-48d4-afbe-cc6524c17d89" alt="Lista de escolas" width="250" />
+  <img src="https://github.com/user-attachments/assets/d76e8975-a99d-4789-925c-65043ce091cf" alt="Turmas da escola" width="250" />
+  <img src="https://github.com/user-attachments/assets/6937609c-4418-4719-acbe-adbbddb4aca0" alt="Formulário escolas" width="250" />
+  <img src="https://github.com/user-attachments/assets/a326b8cc-c5e3-4878-8962-a7cfb098da6e" alt="Formulário turmas" width="250" />
+  <img src="https://github.com/user-attachments/assets/33cc0f81-c072-42f6-b460-62f53e21e490" alt="Edição" width="250" />
+  <img src="https://github.com/user-attachments/assets/7d6ae888-e90c-4d86-ab55-357bc21a2996" alt="Busca" width="250" />
+</p>
 
 ---
 
@@ -16,7 +23,9 @@ O código está organizado por domínio, com fronteira explícita entre contrato
 
 O layout eu mesmo montei no Figma, só pra ter uma base visual enquanto desenvolvia — nada de design system oficial.
 
-[Escolas Públicas — App Layout](https://www.figma.com/design/y85KLNMpQBONHPCxNK8H3f/Escolas-P%C3%BAblicas---App-Layout?node-id=0-1&t=8ruVpPB0rKNHW7yZ-1)
+<a href="https://www.figma.com/design/y85KLNMpQBONHPCxNK8H3f/Escolas-P%C3%BAblicas---App-Layout?node-id=0-1&t=8ruVpPB0rKNHW7yZ-1" target="_blank" rel="noopener noreferrer">Escolas Públicas — App Layout</a>
+
+
 
 ---
 
@@ -232,16 +241,6 @@ O plugin de networking nativo do Reactotron fica **desligado**. Ele também patc
 - Telas usam o layout `Screen` (safe area, header, teclado, toast, FAB).
 - Loading: skeleton da lista/formulário. Erro de fetch: `ErrorView` com retry. Sucesso/falha de mutation: toast.
 - Labels de acessibilidade nos campos, FABs e ações destrutivas.
-
----
-
-## Decisões que importam
-
-1. **Mock no app, não um servidor à parte.** O avaliador (ou o próximo dev) sobe o projeto e já tem dados, delay e erros simuláveis. Trocar para API real é apontar o `baseURL` e desligar o `makeServer()`.
-2. **Adapter na borda do domínio.** A UI nunca lê `school_name`. Se o contrato mudar, o ajuste fica no adapter/API.
-3. **Rotas sem lógica.** Facilita testar screens e reusar o mesmo formulário em criar e editar.
-4. **Busca local.** A API mockada não tem query string de search; filtrar no cliente evita inventar contrato e mantém a lista instantânea.
-5. **Invalidação cruzada.** Criar/apagar turma atualiza também a lista de escolas (`classesCount` no card). Sem isso a home ficaria stale.
 
 ---
 
