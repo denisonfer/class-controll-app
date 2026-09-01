@@ -18,13 +18,17 @@ export function SchoolFormScreen({ schoolId }: TSchoolFormScreenProps) {
   const {
     title,
     submitLabel,
+    isEdit,
     isLoadingSchool,
     isErrorSchool,
     refetchSchool,
     isSubmitting,
+    isDeletingSchool,
+    isBusy,
     control,
     errors,
     onSubmit,
+    onDeletePress,
   } = useSchoolFormScreen({ schoolId });
 
   if (isErrorSchool) {
@@ -83,7 +87,7 @@ export function SchoolFormScreen({ schoolId }: TSchoolFormScreenProps) {
                     accessibilityLabel="Endereço da escola"
                     placeholder="Ex.: Rua das Flores, 123"
                     onSubmitEditing={() => {
-                      if (!isSubmitting) {
+                      if (!isBusy) {
                         onSubmit();
                       }
                     }}
@@ -100,12 +104,25 @@ export function SchoolFormScreen({ schoolId }: TSchoolFormScreenProps) {
 
           <Button
             onPress={onSubmit}
-            isDisabled={isSubmitting}
+            isDisabled={isBusy}
             accessibilityLabel={submitLabel}
           >
             {isSubmitting ? <ButtonSpinner /> : null}
             <ButtonText>{submitLabel}</ButtonText>
           </Button>
+
+          {isEdit ? (
+            <Button
+              variant="outline"
+              className="border-destructive"
+              onPress={onDeletePress}
+              isDisabled={isBusy}
+              accessibilityLabel="Apagar escola"
+            >
+              {isDeletingSchool ? <ButtonSpinner /> : null}
+              <ButtonText className="text-destructive">Apagar escola</ButtonText>
+            </Button>
+          ) : null}
         </Box>
       )}
     </Screen>

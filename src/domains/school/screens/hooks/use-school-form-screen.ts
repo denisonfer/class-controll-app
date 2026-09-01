@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { Alert } from "react-native";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
@@ -10,6 +11,7 @@ import {
   TSchoolFormValues,
 } from "../../school-form-schema";
 import { useCreateSchool } from "../../use-cases/use-create-school";
+import { useDeleteSchool } from "../../use-cases/use-delete-school";
 import { useGetSchool } from "../../use-cases/use-get-school";
 import { useUpdateSchool } from "../../use-cases/use-update-school";
 
@@ -27,6 +29,9 @@ export function useSchoolFormScreen({ schoolId }: TUseSchoolFormScreenParams) {
 
   const { createSchool, isCreatingSchool } = useCreateSchool();
   const { updateSchool, isUpdatingSchool } = useUpdateSchool();
+  const { deleteSchool, isDeletingSchool } = useDeleteSchool();
+
+  const isBusy = isCreatingSchool || isUpdatingSchool || isDeletingSchool;
 
   const {
     control,
@@ -70,8 +75,13 @@ export function useSchoolFormScreen({ schoolId }: TUseSchoolFormScreenParams) {
     router.dismissTo("/");
   }
 
+  function onDeleteSuccess() {
+    showSuccess("Escola apagada com sucesso.");
+    router.dismissTo("/");
+  }
+
   const onSubmit = handleSubmit((values) => {
-    if (isCreatingSchool || isUpdatingSchool) {
+    if (isBusy) {
       return;
     }
 
@@ -96,6 +106,30 @@ export function useSchoolFormScreen({ schoolId }: TUseSchoolFormScreenParams) {
     });
   });
 
+  function confirmDelete() {
+    if (!schoolId || isBusy) {
+      return;
+    }
+
+    deleteSchool(schoolId, {
+      onError: () => {
+        showError("Não foi possível apagar a escola.");
+      },
+      onSuccess: onDeleteSuccess,
+    });
+  }
+
+  function onDeletePress() {
+    if (!isEdit || isBusy) {
+      return;
+    }
+
+    Alert.alert("Apagar escola?", "Essa ação não pode ser desfeita.", [
+      { text: "Cancelar", style: "cancel" },
+      { text: "Apagar", style: "destructive", onPress: confirmDelete },
+    ]);
+  }
+
   return {
     isEdit,
     title: isEdit ? "Editar escola" : "Nova escola",
@@ -104,8 +138,11 @@ export function useSchoolFormScreen({ schoolId }: TUseSchoolFormScreenParams) {
     isErrorSchool,
     refetchSchool,
     isSubmitting: isCreatingSchool || isUpdatingSchool,
+    isDeletingSchool,
+    isBusy,
     control,
     errors,
     onSubmit,
+    onDeletePress,
   };
 }

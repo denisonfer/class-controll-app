@@ -1,5 +1,11 @@
 import { TClassShift } from "./classes-types";
 
+export const CLASS_SHIFT_OPTIONS: TClassShift[] = [
+  "morning",
+  "afternoon",
+  "evening",
+];
+
 const CLASS_SHIFT_LABEL: Record<TClassShift, string> = {
   morning: "Manhã",
   afternoon: "Tarde",
