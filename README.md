@@ -6,6 +6,20 @@ O código está organizado por domínio, com fronteira explícita entre contrato
 
 ---
 
+## Preview
+
+<!-- cola os prints / GIFs aqui -->
+
+---
+
+## Figma
+
+O layout eu mesmo montei no Figma, só pra ter uma base visual enquanto desenvolvia — nada de design system oficial.
+
+[Escolas Públicas — App Layout](https://www.figma.com/design/y85KLNMpQBONHPCxNK8H3f/Escolas-P%C3%BAblicas---App-Layout?node-id=0-1&t=8ruVpPB0rKNHW7yZ-1)
+
+---
+
 ## O que o app faz
 
 O fluxo principal é: listar escolas, abrir uma escola, gerenciar as turmas dela.
