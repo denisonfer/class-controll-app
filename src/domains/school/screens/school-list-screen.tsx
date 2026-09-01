@@ -1,8 +1,9 @@
-import { FloatingActionButton, Screen } from "@/components/layout";
-import { Box } from "@/components/ui/box";
 import { FlatList, ListRenderItemInfo } from "react-native";
 
+import { FloatingActionButton, Screen, SearchField } from "@/components/layout";
 import { ErrorView } from "@/components/layout/error-view";
+import { Box } from "@/components/ui/box";
+import { Text } from "@/components/ui/text";
 import { TSchool } from "../school-types";
 import { CardSchoolItem } from "./components/card-school-item";
 import { SchoolListSkeleton } from "./components/school-list-skeleton";
@@ -11,9 +12,12 @@ import { useSchoolListScreen } from "./hooks/use-school-list-screen";
 export function SchoolListScreen() {
   const {
     schoolList,
+    hasSchools,
+    searchQuery,
     isLoadingSchoolList,
     isErrorSchoolList,
     refetchSchoolList,
+    onSearchQueryChange,
     onSchoolItemPress,
     onCreateSchoolPress,
   } = useSchoolListScreen();
@@ -50,16 +54,36 @@ export function SchoolListScreen() {
     );
   }
 
+  const emptyList = (
+    <Text className="text-muted-foreground">
+      {hasSchools
+        ? "Nenhuma escola encontrada"
+        : "Nenhuma escola cadastrada"}
+    </Text>
+  );
+
   return (
     <Screen title=" " floatingAction={floatingAction}>
-      <FlatList
-        className="flex-1"
-        data={schoolList}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-        showsVerticalScrollIndicator={false}
-        contentContainerClassName="pb-20"
-      />
+      <Box className="flex-1">
+        <SearchField
+          value={searchQuery}
+          onChangeText={onSearchQueryChange}
+          placeholder="Buscar escolas"
+          accessibilityLabel="Buscar escolas"
+          className="mb-4"
+        />
+        <FlatList
+          className="flex-1"
+          data={schoolList}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id}
+          ListEmptyComponent={emptyList}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+          showsVerticalScrollIndicator={false}
+          contentContainerClassName="pb-20"
+        />
+      </Box>
     </Screen>
   );
 }

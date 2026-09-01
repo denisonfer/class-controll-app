@@ -1,6 +1,6 @@
 import { FlatList, ListRenderItemInfo } from "react-native";
 
-import { FloatingActionButton, Screen } from "@/components/layout";
+import { FloatingActionButton, Screen, SearchField } from "@/components/layout";
 import { ErrorView } from "@/components/layout/error-view";
 import { Box } from "@/components/ui/box";
 import { Text } from "@/components/ui/text";
@@ -18,9 +18,12 @@ export function ClassListScreen({ schoolId }: TClassListScreenProps) {
   const {
     school,
     classList,
+    hasClasses,
+    searchQuery,
     isLoadingClassList,
     isErrorClassList,
     refetchClassList,
+    onSearchQueryChange,
     onSchoolHeaderPress,
     onClassItemPress,
     onCreateClassPress,
@@ -50,16 +53,10 @@ export function ClassListScreen({ schoolId }: TClassListScreenProps) {
     );
   }
 
-  const listHeader = (
-    <Box>
-      <Box className="mb-4 shadow-sm">
-        <CardSchoolHeader school={school} onPress={onSchoolHeaderPress} />
-      </Box>
-      <Text className="mb-4 text-xl font-heading text-foreground">Turmas</Text>
-      {classList.length === 0 ? (
-        <Text className="text-muted-foreground">Nenhuma turma cadastrada</Text>
-      ) : null}
-    </Box>
+  const emptyList = (
+    <Text className="text-muted-foreground">
+      {hasClasses ? "Nenhuma turma encontrada" : "Nenhuma turma cadastrada"}
+    </Text>
   );
 
   const renderItem = ({ item }: ListRenderItemInfo<TClass>) => {
@@ -72,15 +69,32 @@ export function ClassListScreen({ schoolId }: TClassListScreenProps) {
 
   return (
     <Screen title="Turmas" canGoBack floatingAction={floatingAction}>
-      <FlatList
-        className="flex-1"
-        data={classList}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-        ListHeaderComponent={listHeader}
-        showsVerticalScrollIndicator={false}
-        contentContainerClassName="pb-20"
-      />
+      <Box className="flex-1">
+        <Box className="mb-4 shadow-sm">
+          <CardSchoolHeader school={school} onPress={onSchoolHeaderPress} />
+        </Box>
+        <SearchField
+          value={searchQuery}
+          onChangeText={onSearchQueryChange}
+          placeholder="Buscar turmas"
+          accessibilityLabel="Buscar turmas"
+          className="mb-4"
+        />
+        <Text className="mb-4 text-xl font-heading text-foreground">
+          Turmas
+        </Text>
+        <FlatList
+          className="flex-1"
+          data={classList}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id}
+          ListEmptyComponent={emptyList}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+          showsVerticalScrollIndicator={false}
+          contentContainerClassName="pb-20"
+        />
+      </Box>
     </Screen>
   );
 }
