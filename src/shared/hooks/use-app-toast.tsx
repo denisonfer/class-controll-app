@@ -60,7 +60,7 @@ export function AppToastHost() {
   return (
     <Box
       pointerEvents="box-none"
-      className="absolute left-0 right-0 top-0 z-50 items-center p-4"
+      className="absolute left-0 right-0 top-10 z-50 items-center p-4"
     >
       <Toast
         nativeID={`app-toast-${currentToast.id}`}

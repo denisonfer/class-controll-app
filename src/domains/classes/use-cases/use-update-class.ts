@@ -11,6 +11,9 @@ export function useUpdateClass() {
       queryClient.invalidateQueries({
         queryKey: [EQueryKeys.GET_CLASSES, updatedClass.schoolId],
       });
+      queryClient.invalidateQueries({
+        queryKey: [EQueryKeys.GET_SCHOOL, updatedClass.schoolId],
+      });
     },
   });
 

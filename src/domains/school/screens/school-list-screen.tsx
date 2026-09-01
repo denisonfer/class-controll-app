@@ -51,7 +51,7 @@ export function SchoolListScreen() {
   }
 
   return (
-    <Screen title="Escolas" floatingAction={floatingAction}>
+    <Screen title=" " floatingAction={floatingAction}>
       <FlatList
         className="flex-1"
         data={schoolList}

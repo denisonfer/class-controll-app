@@ -56,12 +56,15 @@ export function SchoolFormScreen({ schoolId }: TSchoolFormScreenProps) {
                     autoCapitalize="words"
                     returnKeyType="next"
                     accessibilityLabel="Nome da escola"
+                    placeholder="Ex.: Escola de Ensino Fundamental"
                   />
                 </Input>
               )}
             />
             {errors.name?.message ? (
-              <Text className="text-sm text-destructive">{errors.name.message}</Text>
+              <Text className="text-sm text-destructive">
+                {errors.name.message}
+              </Text>
             ) : null}
           </Box>
 
@@ -78,6 +81,7 @@ export function SchoolFormScreen({ schoolId }: TSchoolFormScreenProps) {
                     onBlur={onBlur}
                     returnKeyType="done"
                     accessibilityLabel="Endereço da escola"
+                    placeholder="Ex.: Rua das Flores, 123"
                     onSubmitEditing={() => {
                       if (!isSubmitting) {
                         onSubmit();

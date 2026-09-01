@@ -54,7 +54,7 @@ export const ScreenHeader = memo(
               <ButtonIcon as={ArrowLeftIcon} className="text-foreground" />
             </Button>
           ) : (
-            <FullLogo size={120} />
+            <FullLogo size={150} />
           )}
         </Box>
 
