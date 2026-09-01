@@ -9,6 +9,10 @@ type TCardSchoolItemProps = {
   onPress: (school: TSchool) => void;
 };
 
+function getClassesCountLabel(count: number): string {
+  return count === 1 ? "1 turma" : `${count} turmas`;
+}
+
 export function CardSchoolItem({ school, onPress }: TCardSchoolItemProps) {
   return (
     <Pressable onPress={() => onPress(school)}>
@@ -24,7 +28,7 @@ export function CardSchoolItem({ school, onPress }: TCardSchoolItemProps) {
 
           <Box className="bg-primary-light rounded-full py-2 items-center justify-center mt-2 max-w-24">
             <Text className="text-sm text-primary">
-              {school.classesCount} turmas
+              {getClassesCountLabel(school.classesCount)}
             </Text>
           </Box>
         </Box>

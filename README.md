@@ -1,56 +1,239 @@
-# Welcome to your Expo app 👋
+# Class Controll
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+App mobile para cadastro e gestão de **escolas** e **turmas**, construído com Expo SDK 57, React Native e TypeScript.
 
-## Get started
+O código está organizado por domínio, com fronteira explícita entre contrato da API e modelo da UI. Isso deixa as telas simples, o cache previsível e a troca do mock por um backend real localizada em poucos arquivos.
 
-1. Install dependencies
+---
 
-   ```bash
-   npm install
-   ```
+## O que o app faz
 
-2. Start the app
+O fluxo principal é: listar escolas, abrir uma escola, gerenciar as turmas dela.
 
-   ```bash
-   npx expo start
-   ```
+| Área    | Operações                                         |
+| ------- | ------------------------------------------------- |
+| Escolas | Listar, buscar, criar, editar e apagar            |
+| Turmas  | Listar por escola, buscar, criar, editar e apagar |
 
-In the output, you'll find options to open the app in a
+Cada turma pertence a uma escola e tem nome, turno (manhã, tarde ou noite) e ano letivo. O ano é preenchido automaticamente com o ano corrente na criação e não é editável na UI.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+---
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## Stack
 
-## Get a fresh project
+| Camada                    | Escolha                                        |
+| ------------------------- | ---------------------------------------------- |
+| Runtime                   | Expo SDK 57, React Native 0.86, React 19       |
+| Linguagem                 | TypeScript (strict)                            |
+| Navegação                 | Expo Router (file-based, typed routes)         |
+| UI                        | Gluestack UI + NativeWind v5 / Tailwind CSS v4 |
+| Servidor de estado remoto | TanStack Query                                 |
+| Estado local de busca     | Zustand                                        |
+| Formulários               | React Hook Form + Zod                          |
+| HTTP                      | Axios (`adapter: "xhr"`)                       |
+| Mock da API               | Mirage JS (somente em `__DEV__`)               |
+| Debug                     | Reactotron + plugin do React Query             |
 
-When you're ready, run:
+Plataformas-alvo no `app.json`: **iOS** e **Android**. Dark mode segue o sistema, porém foi feito inicialmente focado no tema 'light'.
 
-```bash
-npm run reset-project
+---
+
+## Arquitetura
+
+A regra é: **rotas não conhecem regra de negócio, telas não conhecem HTTP, e o domínio não vaza o contrato da API para a UI**.
+
+```
+src/
+├── app/                 Rotas (Expo Router). Só conectam params → screens.
+├── api/                 Cliente HTTP, Query Client e mock (Mirage).
+├── domains/             Regras e telas por contexto (school, classes).
+├── components/
+│   ├── layout/          Screen, FAB, busca, error view — composição de tela.
+│   └── ui/              Primitivos visuais (Gluestack).
+├── shared/              Fonts, toast, query keys, Reactotron.
+└── assets/              Marca.
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### Camadas de um domínio
 
-### Other setup steps
+Cada domínio (`school`, `classes`) segue o mesmo pipeline:
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+```
+UI (screen + hook da tela)
+        ↓
+use-case (React Query: query / mutation + invalidação)
+        ↓
+service (orquestra API + adapter)
+        ↓
+adapter (DTO ⇄ modelo de domínio)
+        ↓
+api (Axios, paths e payloads do contrato)
+        ↓
+HTTP / Mirage
+```
 
-## Learn more
+| Arquivo            | Responsabilidade                                                     |
+| ------------------ | -------------------------------------------------------------------- |
+| `*-types.ts`       | DTO da API (`ISchoolDTO`) e modelo da app (`TSchool`)                |
+| `*-api.ts`         | Chamadas HTTP. Só fala a língua do backend.                          |
+| `*-adapter.ts`     | Traduz `school_name` → `name`, calcula `classesCount`, monta payload |
+| `*-service.ts`     | Caso de uso puro, sem React: busca, cria, atualiza, apaga            |
+| `use-cases/`       | Hooks de Query/Mutation. Invalidam cache no sucesso.                 |
+| `*-form-schema.ts` | Validação Zod daquele formulário                                     |
+| `screens/`         | UI + hook da tela (`use-*-screen`). Navegação, toast, Alert.         |
+| `filter-*.ts`      | Filtro local da lista                                                |
+| `stores/`          | Zustand só para o texto da busca                                     |
 
-To learn more about developing your project with Expo, look at the following resources:
+O ponto da adaptação é o contrato da API usar snake_case (`school_id`, `class_shift`) enquanto a UI usa camelCase. Sem adapter, esse detalhe vaza para formulários, cards e caches.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+### Por que o `app/` é fino
 
-## Join the community
+As rotas em `src/app` só extraem params e renderizam a screen do domínio:
 
-Join our community of developers creating universal apps.
+```tsx
+// src/app/schools/[schoolId]/index.tsx
+export default function SchoolClassesRoute() {
+  const { schoolId } = useLocalSearchParams<{ schoolId: string }>();
+  return <ClassListScreen schoolId={id ?? ""} />;
+}
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Isso mantém o Expo Router como borda de navegação, não como lugar de regra.
+
+### Estado
+
+- **Remoto:** TanStack Query. `staleTime` de 5 minutos, retry 2 em queries e 1 em mutations. Após criar/editar/apagar, os `use-cases` invalidam `GET_SCHOOLS`, `GET_SCHOOL` e `GET_CLASSES` conforme o impacto.
+- **Busca:** Zustand por lista (`useSchoolSearchStore`, `useClassSearchStore`). A query HTTP não muda; o filtro é local (`filterSchools` / `filterClasses`).
+- **Formulário:** estado do React Hook Form, validado com Zod antes do submit.
+
+---
+
+## Navegação
+
+```
+/                                  lista de escolas
+├── /schools/new                   criar escola (modal)
+└── /schools/[schoolId]            turmas da escola
+    ├── /schools/[schoolId]/edit   editar / apagar escola
+    ├── /schools/[schoolId]/classes/new              criar turma (modal)
+    └── /schools/[schoolId]/classes/[classId]/edit   editar / apagar turma
+```
+
+Criação abre como `presentation: "modal"`. Edição entra no stack com voltar. Apagar escola ou turma pede confirmação via `Alert` nativo.
+
+---
+
+## Contrato da API (mock)
+
+Em desenvolvimento o Mirage intercepta `http://localhost:3000/api/v1` com delay de 400 ms e seed de 10 escolas e 15 turmas (distribuição irregular: algumas escolas com várias turmas, outras sem nenhuma).
+
+O cliente Axios usa `adapter: "xhr"` de propósito: o Mirage faz patch de `XMLHttpRequest`. O adapter padrão do Axios no RN (fetch) não passa pelo mock.
+
+### Escolas
+
+| Método   | Path           | Notas                                        |
+| -------- | -------------- | -------------------------------------------- |
+| `GET`    | `/schools`     | Lista. Cada item inclui `school_classes`.    |
+| `GET`    | `/schools/:id` | 404 se não existir.                          |
+| `POST`   | `/schools`     | Body: `{ school_name, school_address }`      |
+| `PUT`    | `/schools/:id` | Mesmo body da criação.                       |
+| `DELETE` | `/schools/:id` | Remove a escola e as turmas associadas. 204. |
+
+### Turmas
+
+| Método   | Path                  | Notas                                                      |
+| -------- | --------------------- | ---------------------------------------------------------- |
+| `GET`    | `/classes?school_id=` | Sem `school_id`, retorna lista vazia.                      |
+| `POST`   | `/classes`            | Body: `{ class_name, class_shift, class_year, school_id }` |
+| `PUT`    | `/classes/:id`        | Não altera `school_id`.                                    |
+| `DELETE` | `/classes/:id`        | 204.                                                       |
+
+`class_shift`: `"morning"` \| `"afternoon"` \| `"evening"`.
+
+O mock vive em `src/api/mocks/server.ts`. Serializers em `src/api/mocks/serializers.ts` convertem o modelo interno do Mirage para o DTO que a app espera.
+
+Para simular erro de rede, descomente o `Response(500)` nos handlers do Mirage.
+
+---
+
+## Validação
+
+Regras aplicadas no cliente (Zod), alinhadas ao que a UI mostra:
+
+**Escola**
+
+- Nome: 3–80 caracteres, começa com letra (`\p{L}`).
+- Endereço: 5–120 caracteres, começa com letra.
+
+**Turma**
+
+- Nome: 3–80 caracteres.
+- Turno: um dos três valores do enum.
+- Ano letivo: derivado no hook (ano atual na criação; ano existente na edição).
+
+---
+
+## Como rodar
+
+Pré-requisitos: Node.js compatível com Expo SDK 57, [Expo Go](https://expo.dev/go) no dispositivo ou simulador iOS / emulador Android.
+
+```bash
+npm install
+npm start
+```
+
+No terminal do Metro:
+
+- `i` — simulador iOS
+- `a` — emulador Android
+- escanear o QR code com o Expo Go
+
+Não é necessário backend. O Mirage sobe no `_layout` quando `__DEV__` é verdadeiro.
+
+```bash
+npm run lint    # expo lint
+```
+
+Há `npm run web`, mas o `app.json` declara apenas iOS e Android como plataformas oficiais.
+
+---
+
+## Debug
+
+Em `__DEV__` o app conecta o Reactotron (`src/shared/reactotron-config.ts`):
+
+- cache e mutations do React Query
+- requests Axios (método, URL, status, duração, body)
+
+O plugin de networking nativo do Reactotron fica **desligado**. Ele também patcha `XMLHttpRequest` e conflita com o Mirage no segundo launch.
+
+---
+
+## Convenções
+
+- Path alias `@/` aponta para `src/`.
+- Arquivos em kebab-case (`school-list-screen.tsx`).
+- Tipos de domínio: `T` para aliases (`TSchool`), `I` para DTOs da API (`ISchoolDTO`).
+- Query keys centralizadas em `src/shared/query-keys.ts`.
+- Telas usam o layout `Screen` (safe area, header, teclado, toast, FAB).
+- Loading: skeleton da lista/formulário. Erro de fetch: `ErrorView` com retry. Sucesso/falha de mutation: toast.
+- Labels de acessibilidade nos campos, FABs e ações destrutivas.
+
+---
+
+## Decisões que importam
+
+1. **Mock no app, não um servidor à parte.** O avaliador (ou o próximo dev) sobe o projeto e já tem dados, delay e erros simuláveis. Trocar para API real é apontar o `baseURL` e desligar o `makeServer()`.
+2. **Adapter na borda do domínio.** A UI nunca lê `school_name`. Se o contrato mudar, o ajuste fica no adapter/API.
+3. **Rotas sem lógica.** Facilita testar screens e reusar o mesmo formulário em criar e editar.
+4. **Busca local.** A API mockada não tem query string de search; filtrar no cliente evita inventar contrato e mantém a lista instantânea.
+5. **Invalidação cruzada.** Criar/apagar turma atualiza também a lista de escolas (`classesCount` no card). Sem isso a home ficaria stale.
+
+---
+
+## Documentação de referência
+
+- [Expo SDK 57](https://docs.expo.dev/versions/v57.0.0/)
+- [Expo Router](https://docs.expo.dev/router/introduction/)
+- [TanStack Query](https://tanstack.com/query/latest/docs/framework/react/overview)
+- [Mirage JS](https://miragejs.com/docs/getting-started/introduction/)

@@ -21,6 +21,37 @@ import { serializeClass, serializeSchool } from "./serializers";
 
 const CLASS_SHIFTS = ["morning", "afternoon", "evening"] as const;
 
+const SCHOOL_SEEDS = [
+  { name: "Escola Municipal Santos Dumont", address: "Rua das Flores, 120", classCount: 4 },
+  { name: "Colégio Estadual Tiradentes", address: "Av. Brasil, 850", classCount: 3 },
+  { name: "EMEF Monteiro Lobato", address: "Rua das Acácias, 45", classCount: 2 },
+  { name: "Escola Municipal Cecília Meireles", address: "Praça da República, 10", classCount: 2 },
+  { name: "Colégio Dom Pedro II", address: "Rua do Comércio, 300", classCount: 1 },
+  { name: "EMEF Paulo Freire", address: "Av. Independência, 2100", classCount: 1 },
+  { name: "Escola Estadual Machado de Assis", address: "Rua das Palmeiras, 78", classCount: 1 },
+  { name: "Centro Educacional Anísio Teixeira", address: "Rua São João, 512", classCount: 1 },
+  { name: "EMEF Cora Coralina", address: "Av. das Nações, 90", classCount: 0 },
+  { name: "Escola Municipal Vinicius de Moraes", address: "Rua da Paz, 15", classCount: 0 },
+] as const;
+
+const CLASS_NAMES = [
+  "1º Ano A",
+  "1º Ano B",
+  "2º Ano A",
+  "3º Ano A",
+  "4º Ano B",
+  "5º Ano A",
+  "6º Ano C",
+  "7º Ano A",
+  "8º Ano B",
+  "9º Ano A",
+  "1º Ano C",
+  "2º Ano B",
+  "3º Ano B",
+  "4º Ano A",
+  "5º Ano B",
+] as const;
+
 function isCollection<T>(resource: unknown): resource is { models: T[] } {
   return (
     typeof resource === "object" &&
@@ -39,6 +70,12 @@ function serializeResource<T>(
   }
 
   return serializeOne(resource as T);
+}
+
+function byNewestFirst<T extends { id?: string }>(collection: {
+  sort: (compare: (a: T, b: T) => number) => unknown;
+}) {
+  return collection.sort((a, b) => Number(b.id) - Number(a.id));
 }
 
 const globalRef = globalThis as typeof globalThis & {
@@ -63,15 +100,15 @@ export function makeServer() {
     factories: {
       school: Factory.extend({
         name(i: number) {
-          return `Escola Municipal ${i + 1}`;
+          return SCHOOL_SEEDS[i % SCHOOL_SEEDS.length].name;
         },
         address(i: number) {
-          return `Rua das Flores, ${100 + i}`;
+          return SCHOOL_SEEDS[i % SCHOOL_SEEDS.length].address;
         },
       }),
       schoolClass: Factory.extend({
         name(i: number) {
-          return `${(i % 3) + 1}º Ano`;
+          return CLASS_NAMES[i % CLASS_NAMES.length];
         },
         shift(i: number) {
           return CLASS_SHIFTS[i % CLASS_SHIFTS.length];
@@ -94,10 +131,15 @@ export function makeServer() {
     },
 
     seeds(server) {
-      const schools = server.createList("school", 3);
+      SCHOOL_SEEDS.forEach((seed) => {
+        const school = server.create("school", {
+          name: seed.name,
+          address: seed.address,
+        });
 
-      schools.forEach((school) => {
-        server.createList("schoolClass", 2, { school });
+        if (seed.classCount > 0) {
+          server.createList("schoolClass", seed.classCount, { school });
+        }
       });
     },
 
@@ -108,7 +150,7 @@ export function makeServer() {
       this.logging = true;
 
       this.get("/schools", (schema) => {
-        return schema.all("school");
+        return byNewestFirst(schema.all("school"));
         //return new Response(500, {}, { message: "Falha simulada" });
       });
 
@@ -177,7 +219,7 @@ export function makeServer() {
           return schema.none("schoolClass");
         }
 
-        return school.schoolClasses;
+        return byNewestFirst(school.schoolClasses);
       });
 
       this.post("/classes", (schema, request) => {
