@@ -10,6 +10,7 @@ export function useDeleteClass() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [EQueryKeys.GET_CLASSES] });
       queryClient.invalidateQueries({ queryKey: [EQueryKeys.GET_SCHOOLS] });
+      queryClient.invalidateQueries({ queryKey: [EQueryKeys.GET_SCHOOL] });
     },
   });
 

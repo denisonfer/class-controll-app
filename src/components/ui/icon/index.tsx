@@ -562,6 +562,30 @@ export {
   ChevronsUpDownIcon,
 };
 
+const MapPinIcon = createIcon({
+  Root: Svg,
+  viewBox: '0 0 24 24',
+  path: (
+    <>
+      <Path
+        d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M12 7a3 3 0 1 0 0.001 6 3 3 0 0 0 0-6z"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </>
+  ),
+});
+
+MapPinIcon.displayName = 'MapPinIcon';
+export { MapPinIcon };
+
 const CircleIcon = createIcon({
   Root: Svg,
   viewBox: '0 0 24 24',

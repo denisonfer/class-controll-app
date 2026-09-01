@@ -12,6 +12,9 @@ export function useCreateClass() {
         queryKey: [EQueryKeys.GET_CLASSES, createdClass.schoolId],
       });
       queryClient.invalidateQueries({ queryKey: [EQueryKeys.GET_SCHOOLS] });
+      queryClient.invalidateQueries({
+        queryKey: [EQueryKeys.GET_SCHOOL, createdClass.schoolId],
+      });
     },
   });
 

@@ -3,15 +3,18 @@ import { useQuery } from "@tanstack/react-query";
 import { classesService } from "../classes-service";
 
 export function useGetClassList(schoolId: string) {
-  const { data, isPending, isFetching, isError } = useQuery({
+  const enabled = !!schoolId;
+
+  const { data, isPending, isError, refetch } = useQuery({
     queryKey: [EQueryKeys.GET_CLASSES, schoolId],
     queryFn: () => classesService.getClasses(schoolId),
-    enabled: !!schoolId,
+    enabled,
   });
 
   return {
     classList: data,
-    isLoadingClassesList: isPending || isFetching,
-    isErrorClassesList: isError,
+    isLoadingClassesList: enabled && isPending && !data,
+    isErrorClassesList: enabled && isError && !data,
+    refetchClassesList: refetch,
   };
 }
