@@ -18,7 +18,7 @@ export function CardSchoolItem({ school, onPress }: TCardSchoolItemProps) {
           <Text className="flex-1 text-xl font-heading text-foreground">
             {school.name}
           </Text>
-          <Text className="text-md font-sans text-gray-500">
+          <Text className="text-md font-body text-gray-500">
             {school.address}
           </Text>
 

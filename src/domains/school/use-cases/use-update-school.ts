@@ -7,8 +7,11 @@ export function useUpdateSchool() {
 
   const { mutate, mutateAsync, isPending, isError, isSuccess } = useMutation({
     mutationFn: schoolService.updateSchool,
-    onSuccess: () => {
+    onSuccess: (_school, variables) => {
       queryClient.invalidateQueries({ queryKey: [EQueryKeys.GET_SCHOOLS] });
+      queryClient.invalidateQueries({
+        queryKey: [EQueryKeys.GET_SCHOOL, variables.id],
+      });
     },
   });
 
